@@ -71,8 +71,8 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']);
         </dd>
       </dl>
       <dl>
-        <dt>Menu Name</dt>
-        <dd><input type="text" name="name" value="<?php echo h($page['title']); ?>" /></dd>
+        <dt>Title</dt>
+        <dd><input type="text" name="title" value="<?php echo h($page['title']); ?>" /></dd>
       </dl>
       <dl>
         <dt>Position</dt>

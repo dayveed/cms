@@ -1,3 +1,10 @@
 RewriteEngine on
 
-RewriteRule ^articles/([^/]+)/?$ index.php?slug=$1 [L]
+RewriteRule ^articles/([^/]+)/?$ index.php?content_type=articles&slug=$1 [L]
+RewriteRule ^blog-posts/([^/]+)/?$ index.php?content_type=blog-posts&slug=$1 [L]
+RewriteRule ^cost-guides/([^/]+)/?$ index.php?content_type=cost-guides&slug=$1 [L]
+RewriteRule ^experiences/([^/]+)/?$ index.php?content_type=experiences&slug=$1 [L]
+
+RewriteRule ^content/([^/]+)/([^/]+)/?$ index.php?content_type=$1&slug=$2 [L]
+
+RewriteRule ^old-mod-rewrite$ /new-mod-rewrite.php [R=301,L]

@@ -4,7 +4,7 @@ require_once('../../../private/initialize.php');
 
 require_login();
 
-$id = $_GET['id'] ?? '1'; // PHP > 7.0
+$id = $_GET['id'] ?? '1'; 
 $admin = find_admin_by_id($id);
 
 ?>

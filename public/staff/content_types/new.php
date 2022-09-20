@@ -25,7 +25,7 @@ if(is_post_request()) {
   }
 
 } else {
-  // display the blank form
+  
   $content_type = [];
   $content_type["name"] = '';
   $content_type["position"] = $content_type_count;

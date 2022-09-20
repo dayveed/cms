@@ -4,7 +4,7 @@
 
 $preview = false;
 if(isset($_GET['preview'])) {
-  // previewing should require admin to be logged in
+ 
   $preview = $_GET['preview'] == 'true' && is_logged_in() ? true : false;
 }
 $visible = !$preview;
@@ -28,7 +28,7 @@ if(isset($_GET['id'])) {
     redirect_to(get_url('/index.php'));
   }
   $page_set = find_pages_by_content_type_id($content_type_id, ['visible' => $visible]);
-  $page = mysqli_fetch_assoc($page_set); // first page
+  $page = mysqli_fetch_assoc($page_set); 
   mysqli_free_result($page_set);
   if(!$page) {
     redirect_to(get_url('/index.php'));
@@ -37,7 +37,8 @@ if(isset($_GET['id'])) {
 } 
 elseif(isset($_GET['slug'])) {
   $page_slug = $_GET['slug'];
-  $page = find_page_by_slug($page_slug, ['visible' => $visible]);
+  $content_type_slug = $_GET['content_type'];
+  $page = find_page_by_slug($page_slug, $content_type_slug, ['visible' => $visible]);
   if(!$page) {
     redirect_to(get_url('/index.php'));
   }
@@ -48,7 +49,7 @@ elseif(isset($_GET['slug'])) {
   }
 }
 else {
-  // nothing selected; show the homepage
+ 
 }
 
 ?>
@@ -61,30 +62,28 @@ else {
 
   <div id="page">
   <div id="page-info">
-    <h1><?php echo $page['title'];?></h1>
-    <p><?php echo format_page_date($page['updated_at'])?></p>
+    <h1><?php if (isset($page['title'])) {echo $page['title'];}?></h1>
+    <p><?php if (isset($page['updated_at'])) {echo format_page_date($page['updated_at']);} ?></p>
     <div id="author">
-    <h4>Written by: <?php echo $page['title'] ?? '';?></h4>
+    <h4><?php  if (isset($page['name'])) {echo 'Written by: '. $page['name'];} ?></h4>
     <p><i><?php echo $page['blurb'] ?? '';?></i></p>
   </div>
   </div> 
- 
+  <div id="content">
     <?php
+      
       if(isset($page)) {
-        // show the page from the database
+        
         $allowed_tags = '<div><img><h1><h2><p><br><strong><em><ul><li>';
+        
         echo strip_tags($page['content'], $allowed_tags);
 
       } else {
-        // Show the homepage
-        // The homepage content could:
-        // * be static content (here or in a shared file)
-        // * show the first page from the nav
-        // * be in the database but add code to hide in the nav
+       
         include(COMMON_PATH . '/static_homepage.php');
       }
     ?>
-
+</div>
   </div>
 
 </div>

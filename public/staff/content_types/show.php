@@ -3,8 +3,7 @@
 <?php
 require_login();
 
-// $id = isset($_GET['id']) ? $_GET['id'] : '1';
-$id = $_GET['id'] ?? '1'; // PHP > 7.0
+$id = $_GET['id'] ?? '1'; 
 
 $content_type = find_content_type_by_id($id);
 $page_set = find_pages_by_content_type_id($id);

@@ -8,7 +8,7 @@
     $sql = "SELECT * FROM content_types ";
     
     $sql .= "ORDER BY position ASC";
-    //echo $sql;
+    
     $result = mysqli_query($db, $sql);
     confirm_result_set($result);
     return $result;
@@ -28,7 +28,7 @@
     confirm_result_set($result);
     $content_type = mysqli_fetch_assoc($result);
     mysqli_free_result($result);
-    return $content_type; // returns an assoc. array
+    return $content_type; 
   }
 
   function validate_content_type($content_type) {
@@ -60,11 +60,11 @@
     $sql .= "'" . db_escape($db, $content_type['visible']) . "'";
     $sql .= ")";
     $result = mysqli_query($db, $sql);
-    // For INSERT statements, $result is true/false
+  
     if($result) {
       return true;
     } else {
-      // INSERT failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -91,11 +91,11 @@
     $sql .= "LIMIT 1";
 
     $result = mysqli_query($db, $sql);
-    // For UPDATE statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // UPDATE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -115,11 +115,9 @@
     $sql .= "LIMIT 1";
     $result = mysqli_query($db, $sql);
 
-    // For DELETE statements, $result is true/false
     if($result) {
       return true;
     } else {
-      // DELETE failed
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -133,33 +131,27 @@
 
     $sql = "UPDATE content_types ";
     if($start_pos == 0) {
-      // new item, +1 to items greater than $end_pos
       $sql .= "SET position = position + 1 ";
       $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
     } elseif($end_pos == 0) {
-      // delete item, -1 from items greater than $start_pos
       $sql .= "SET position = position - 1 ";
       $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
     } elseif($start_pos < $end_pos) {
-      // move later, -1 from items between (including $end_pos)
       $sql .= "SET position = position - 1 ";
       $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
       $sql .= "AND position <= '" . db_escape($db, $end_pos) . "' ";
     } elseif($start_pos > $end_pos) {
-      // move earlier, +1 to items between (including $end_pos)
       $sql .= "SET position = position + 1 ";
       $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
       $sql .= "AND position < '" . db_escape($db, $start_pos) . "' ";
     }
-    // Exclude the current_id in the SQL WHERE clause
     $sql .= "AND id != '" . db_escape($db, $current_id) . "' ";
 
     $result = mysqli_query($db, $sql);
-    // For UPDATE statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // UPDATE failed
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -167,7 +159,7 @@
   }
 
 
-  // Pages
+  
 
   function find_all_pages() {
     global $db;
@@ -185,7 +177,7 @@
     $visible = $options['visible'] ?? false;
 
     $sql = "SELECT * FROM pages ";
-    $sql .= "INNER JOIN authors ON pages.author_id = authors.id ";
+    $sql .= "LEFT JOIN authors ON pages.author_id = authors.id ";
     $sql .= "WHERE pages.id='" . db_escape($db, $id) . "' ";
     if($visible) {
       $sql .= "AND visible = true";
@@ -194,31 +186,35 @@
     confirm_result_set($result);
     $page = mysqli_fetch_assoc($result);
     mysqli_free_result($result);
-    return $page; // returns an assoc. array
+    return $page; 
   }
 
-  function find_page_by_slug($slug, $options=[]) {
+  function find_page_by_slug($slug, $content_type, $options=[]) {
     global $db;
 
     $visible = $options['visible'] ?? false;
 
     $sql = "SELECT * FROM pages ";
-    $sql .= "INNER JOIN authors ON pages.author_id = authors.id ";
+    $sql .= "LEFT JOIN authors ON pages.author_id = authors.id ";
+    $sql .= "LEFT JOIN content_types ON pages.content_type_id = content_types.id ";
     $sql .= "WHERE pages.slug='" . db_escape($db, $slug) . "' ";
+    if($content_type) {
+      $sql .= "AND content_types.slug='" . db_escape($db, $content_type) . "' ";
+    }
     if($visible) {
-      $sql .= "AND visible = true";
+      $sql .= "AND pages.visible = true";
     }
     $result = mysqli_query($db, $sql);
     confirm_result_set($result);
     $page = mysqli_fetch_assoc($result);
     mysqli_free_result($result);
-    return $page; // returns an assoc. array
+    return $page; 
   }
 
   function get_blog_post($id) {
     $sql = "SELECT * FROM pages ";
-    $sql .= "INNER JOIN page_meta on pages.id = page_meta.page_id ";
-    $sql .= "INNER JOIN services on page_meta.meta_value = services.id ";
+    $sql .= "LEFT JOIN page_meta on pages.id = page_meta.page_id ";
+    $sql .= "LEFT JOIN services on page_meta.meta_value = services.id ";
     $sql .= "WHERE pages.id='" . db_escape($db, $id) . "' ";
     $sql .= "AND WHERE page_meta.meta_key = 'service_id' ";
     
@@ -226,25 +222,25 @@
   function validate_page($page) {
     $errors = [];
 
-    // content_type_id
+    
     if(is_blank($page['content_type_id'])) {
       $errors[] = "Content type cannot be blank.";
     }
 
-    // name
+    
     if(is_blank($page['title'])) {
       $errors[] = "Title cannot be blank.";
     } elseif(!has_length($page['title'], ['min' => 2, 'max' => 255])) {
       $errors[] = "Title must be between 2 and 255 characters.";
     }
     $current_id = $page['id'] ?? '0';
-    if(!has_unique_page_name($page['title'], $current_id)) {
-      $errors[] = "Menu name must be unique.";
+    $content_type_id  = $page['content_type_id'];
+    if(!has_unique_page_name($page['title'], $current_id, $content_type_id)) {
+      $errors[] = "Title must be unique for each content type.";
     }
 
 
-    // position
-    // Make sure we are working with an integer
+   
     $postion_int = (int) $page['position'];
     if($postion_int <= 0) {
       $errors[] = "Position must be greater than zero.";
@@ -253,14 +249,12 @@
       $errors[] = "Position must be less than 999.";
     }
 
-    // visible
-    // Make sure we are working with a string
     $visible_str = (string) $page['visible'];
     if(!has_inclusion_of($visible_str, ["0","1"])) {
       $errors[] = "Visible must be true or false.";
     }
 
-    // content
+    
     if(is_blank($page['content'])) {
       $errors[] = "Content cannot be blank.";
     }
@@ -268,7 +262,7 @@
     return $errors;
   }
 
-  function insert_page($page) {
+  function insert_page($page, $page_meta) {
     global $db;
 
     $errors = validate_page($page);
@@ -290,11 +284,26 @@
     $sql .= "'" . db_escape($db, $page['slug']) . "'";
     $sql .= ")";
     $result = mysqli_query($db, $sql);
-    // For INSERT statements, $result is true/false
+    $new_id = mysqli_insert_id($db);
+    
+    if (count($page_meta) > 0) {
+      
+      foreach ($page_meta as $key => $value) {
+        $sql_meta = "INSERT INTO page_meta ";
+        $sql_meta .= "(page_id, meta_key, meta_value) ";
+        $sql_meta .= "VALUES (";
+        $sql_meta .= "'" . db_escape($db, $new_id) . "',";
+        $sql_meta .= "'" . db_escape($db, $key) . "',";
+        $sql_meta .= "'" . db_escape($db, $value) . "'";
+        $sql_meta .= ")";
+        $result_meta = mysqli_query($db, $sql_meta);
+      }
+    }
+    
     if($result) {
       return true;
     } else {
-      // INSERT failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -323,11 +332,11 @@
     $sql .= "LIMIT 1";
 
     $result = mysqli_query($db, $sql);
-    // For UPDATE statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // UPDATE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -347,11 +356,16 @@
     $sql .= "LIMIT 1";
     $result = mysqli_query($db, $sql);
 
-    // For DELETE statements, $result is true/false
+    $sql = "DELETE FROM page_meta ";
+    $sql .= "WHERE page_id='" . db_escape($db, $id) . "' ";
+    
+    $result = mysqli_query($db, $sql);
+
+   
     if($result) {
       return true;
     } else {
-      // DELETE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -401,34 +415,34 @@
 
     $sql = "UPDATE pages ";
     if($start_pos == 0) {
-      // new item, +1 to items greater than $end_pos
+      
       $sql .= "SET position = position + 1 ";
       $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
     } elseif($end_pos == 0) {
-      // delete item, -1 from items greater than $start_pos
+      
       $sql .= "SET position = position - 1 ";
       $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
     } elseif($start_pos < $end_pos) {
-      // move later, -1 from items between (including $end_pos)
+     
       $sql .= "SET position = position - 1 ";
       $sql .= "WHERE position > '" . db_escape($db, $start_pos) . "' ";
       $sql .= "AND position <= '" . db_escape($db, $end_pos) . "' ";
     } elseif($start_pos > $end_pos) {
-      // move earlier, +1 to items between (including $end_pos)
+     
       $sql .= "SET position = position + 1 ";
       $sql .= "WHERE position >= '" . db_escape($db, $end_pos) . "' ";
       $sql .= "AND position < '" . db_escape($db, $start_pos) . "' ";
     }
-    // Exclude the current_id in the SQL WHERE clause
+   
     $sql .= "AND id != '" . db_escape($db, $current_id) . "' ";
     $sql .= "AND content_type_id = '" . db_escape($db, $content_type_id) . "'";
 
     $result = mysqli_query($db, $sql);
-    // For UPDATE statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // UPDATE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -436,9 +450,6 @@
   }
 
 
-  // Admins
-
-  // Find all admins, ordered last_name, first_name
   function find_all_admins() {
     global $db;
 
@@ -457,9 +468,9 @@
     $sql .= "LIMIT 1";
     $result = mysqli_query($db, $sql);
     confirm_result_set($result);
-    $admin = mysqli_fetch_assoc($result); // find first
+    $admin = mysqli_fetch_assoc($result); 
     mysqli_free_result($result);
-    return $admin; // returns an assoc. array
+    return $admin;
   }
 
   function find_admin_by_username($username) {
@@ -470,9 +481,9 @@
     $sql .= "LIMIT 1";
     $result = mysqli_query($db, $sql);
     confirm_result_set($result);
-    $admin = mysqli_fetch_assoc($result); // find first
+    $admin = mysqli_fetch_assoc($result); 
     mysqli_free_result($result);
-    return $admin; // returns an assoc. array
+    return $admin; 
   }
 
   function validate_admin($admin, $options=[]) {
@@ -553,11 +564,11 @@
     $sql .= ")";
     $result = mysqli_query($db, $sql);
 
-    // For INSERT statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // INSERT failed
+    
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -588,11 +599,11 @@
     $sql .= "LIMIT 1";
     $result = mysqli_query($db, $sql);
 
-    // For UPDATE statements, $result is true/false
+   
     if($result) {
       return true;
     } else {
-      // UPDATE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -607,11 +618,11 @@
     $sql .= "LIMIT 1;";
     $result = mysqli_query($db, $sql);
 
-    // For DELETE statements, $result is true/false
+    
     if($result) {
       return true;
     } else {
-      // DELETE failed
+      
       echo mysqli_error($db);
       db_disconnect($db);
       exit;
@@ -624,7 +635,31 @@
     $sql = "SELECT * FROM authors ";
     
     $sql .= "ORDER BY name ASC";
-    //echo $sql;
+   
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    return $result;
+  }
+
+  function find_all_services($options=[]) {
+    global $db;
+
+    $sql = "SELECT * FROM services ";
+    
+    $sql .= "ORDER BY name ASC";
+ 
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    return $result;
+  }
+
+  function find_all_contractors($options=[]) {
+    global $db;
+
+    $sql = "SELECT * FROM contractors ";
+    
+    $sql .= "ORDER BY name ASC";
+   
     $result = mysqli_query($db, $sql);
     confirm_result_set($result);
     return $result;

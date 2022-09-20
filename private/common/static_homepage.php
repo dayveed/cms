@@ -1,5 +1,5 @@
 <div id="hero-image">
-  <img src="images/homepage_assets/world_in_hands_900px.png" width="900" height="200" alt="" />
+  <img src="<?php echo get_url('/images/homepage_assets/data.jpg');?>" width="900" height="300" alt="" />
 </div>
 
 <div id="content">

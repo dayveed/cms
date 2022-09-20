@@ -5,7 +5,7 @@ require_once('../../../private/initialize.php');
 require_login();
 
 if(is_post_request()) {
-  
+ 
   $page = [];
   $page['content_type_id'] = $_POST['content_type_id'] ?? '';
   $page['title'] = $_POST['title'] ?? '';
@@ -14,10 +14,16 @@ if(is_post_request()) {
   $page['content'] = $_POST['content'] ?? '';
   $page['author_id'] = $_POST['author_id'] ?? '';
 
+  $page_meta = [];
+  $page_meta['service_id'] = $_POST['service_id'] ?? '';
+  $page_meta['contractor_id'] = $_POST['contractor_id'] ?? '';
+  $page_meta['minimum_cost'] = $_POST['minimum_cost'] ?? '';
+  $page_meta['maximum_cost'] = $_POST['maximum_cost'] ?? '';
+  
   $page['slug'] = preg_replace("/-$/","",preg_replace('/[^a-z0-9]+/i', "-", strtolower($page['title']))) ?? 'bob';
 
 
-  $result = insert_page($page);
+  $result = insert_page($page, $page_meta);
   if($result === true) {
     $new_id = mysqli_insert_id($db);
     $_SESSION['message'] = 'The page was created successfully.';
@@ -29,12 +35,19 @@ if(is_post_request()) {
 } else {
 
   $page = [];
-  $page['content_type_id'] = $_GET['content_type_id'] ?? '1';
+  $page['content_type_id'] = $_GET['content_type_id'] ?? '';
   $page['title'] = '';
   $page['position'] = '';
   $page['visible'] = '';
   $page['content'] = '';
   $page['author_id'] = '';
+
+  $page_meta = [];
+  $page_meta['service_id'] = '';
+  $page_meta['contractor_id'] = '';
+  $page_meta['minimum_cost'] = '';
+  $page_meta['maximum_cost'] = '';
+  
 
 }
 
@@ -58,7 +71,8 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']) + 1;
       <dl>
         <dt>Content type</dt>
         <dd>
-          <select name="content_type_id">
+          <select name="content_type_id" id="content-type-select">
+          <option disabled selected value> -- select an option -- </option>
           <?php
             $content_type_set = find_all_content_types();
             while($content_type = mysqli_fetch_assoc($content_type_set)) {
@@ -125,6 +139,54 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']) + 1;
           <textarea name="content" cols="60" rows="10"><?php echo h($page['content']); ?></textarea>
         </dd>
       </dl>
+      <dl id="page-service">
+        <dt>Service</dt>
+        <dd>
+        <select name="service_id">
+        <option disabled selected value> -- select an option -- </option>
+          <?php
+            $service_set = find_all_services();
+            while($service = mysqli_fetch_assoc($service_set)) {
+              echo "<option value=\"" . h($service['id']) . "\"";
+              if($page_meta["service_id"] == $service['id']) {
+                echo " selected";
+              }
+              echo ">" . h($service['name']) . "</option>";
+            }
+            mysqli_free_result($service_set);
+          ?>
+          </select>
+        </dd>
+      </dl>
+      <dl id="page-contractor">
+        <dt>Contractor</dt>
+        <dd>
+        <select name="contractor_id">
+        <option disabled selected value> -- select an option -- </option>
+          <?php
+            $contractor_set = find_all_contractors();
+            while($contractor = mysqli_fetch_assoc($contractor_set)) {
+              echo "<option value=\"" . h($contractor['id']) . "\"";
+              if($page_meta["contractor_id"] == $contractor['id']) {
+                echo " selected";
+              }
+              echo ">" . h($contractor['name']) . "</option>";
+            }
+            mysqli_free_result($contractor_set);
+          ?>
+          </select>
+        </dd>
+      </dl>
+      <dl id="page-maximum-cost">
+        <dt>Maximum cost</dt>
+        <dd><input type="number" name="maximum_cost" value="<?php echo h($page_meta['maximum_cost']); ?>" /></dd>
+      </dl>
+      <dl>
+      <dl id="page-minimum-cost">
+        <dt>Minimum cost</dt>
+        <dd><input type="number" name="minimum_cost" value="<?php echo h($page_meta['minimum_cost']); ?>" /></dd>
+      </dl>
+      <dl>
       <div id="operations">
         <input type="submit" value="Create Page" />
       </div>
@@ -133,5 +195,52 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']) + 1;
   </div>
 
 </div>
+<script>
+  $(document).ready(function() {
+    $('#content-type-select').change(function(){
+      let contentTypeId = $(this).val()
+      console.log(contentTypeId)
+      switch(contentTypeId) {
+        case '1':
+          $('#page-service').hide()
+          $('#page-service select').val('')
+          $('#page-contractor').hide()
+          $('#page-contractor select').val('')
+          $('#page-minimum-cost').hide()
+          $('#page-minimum-cost input').val('')
+          $('#page-maximum-cost').hide()
+          $('#page-maximum-cost input').val('')
+          break;
+        case '2':
+          $('#page-service').show()
+          $('#page-contractor').hide()
+          $('#page-contractor select').val('')
+          $('#page-minimum-cost').hide()
+          $('#page-minimum-cost input').val('')
+          $('#page-maximum-cost').hide()
+          $('#page-maximum-cost input').val('')
+          break;
+        case '3':
+          $('#page-service').hide()
+          $('#page-service select').val('')
+          $('#page-contractor').show()
+          $('#page-minimum-cost').hide()
+          $('#page-minimum-cost input').val('')
+          $('#page-maximum-cost').hide()
+          $('#page-maximum-cost input').val('')
+          break;
+        case '5':
+          $('#page-service').hide()
+          $('#page-service select').val('')
+          $('#page-contractor').hide()
+          $('#page-contractor select').val('')
+          $('#page-minimum-cost').show()
+          $('#page-maximum-cost').show()
+          break;  
+        default:  
 
+}
+    })
+  })
+</script>
 <?php include(COMMON_PATH . '/staff_footer.php'); ?>

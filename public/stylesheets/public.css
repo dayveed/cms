@@ -27,7 +27,7 @@ header {
   margin: 0;
   padding: 0;
   text-align: left;
-  background: #e03e52;
+  background: #6f5499;
   color: #FFFFFF;
 }
 
@@ -62,7 +62,7 @@ navigation {
   float: left;
   width: 200px;
   height: 100%;
-  background: #7a6855;
+  background: #0269c2;
 }
 
 navigation a {

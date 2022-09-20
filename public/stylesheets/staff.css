@@ -139,3 +139,7 @@ dd {
   margin: 1em 30px;
   width: 890px;
 }
+
+#page-service,#page-contractor,#page-maximum-cost,#page-minimum-cost {
+  display:none;
+}

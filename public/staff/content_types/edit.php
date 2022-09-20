@@ -11,8 +11,6 @@ $id = $_GET['id'];
 
 if(is_post_request()) {
 
-  // Handle form values sent by new.php
-
   $content_type = [];
   $content_type['id'] = $id;
   $content_type['name'] = $_POST['name'] ?? '';
@@ -25,7 +23,7 @@ if(is_post_request()) {
     redirect_to(get_url('/staff/content_types/show.php?id=' . $id));
   } else {
     $errors = $result;
-    //var_dump($errors);
+    
   }
 
 } else {

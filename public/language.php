@@ -3,13 +3,13 @@
 <?php
 
 if(is_post_request()) {
-  // Form was submitted
+  
   $language = $_POST['language'] ?? 'Any';
   $expire = time() + 60*60*24*365;
   setcookie('language', $language, $expire);
 
 } else {
-  // Read the stored value (if any)
+  
   $language = $_COOKIE['language'] ?? 'None';
 }
 

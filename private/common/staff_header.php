@@ -9,6 +9,7 @@
     <title><?php echo SITE_NAME.' - '.h($page_title); ?></title>
     <meta charset="utf-8">
     <link rel="stylesheet" media="all" href="<?php echo get_url('/stylesheets/staff.css'); ?>" />
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
   </head>
 
   <body>

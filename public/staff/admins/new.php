@@ -23,7 +23,7 @@ if(is_post_request()) {
   }
 
 } else {
-  // display the blank form
+
   $admin = [];
   $admin["first_name"] = '';
   $admin["last_name"] = '';
