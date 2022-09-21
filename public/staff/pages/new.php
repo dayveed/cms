@@ -191,7 +191,6 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']) + 1;
         <input type="submit" value="Create Page" />
       </div>
     </form>
-
   </div>
 
 </div>
