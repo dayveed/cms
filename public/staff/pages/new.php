@@ -24,8 +24,8 @@ if(is_post_request()) {
 
 
   $result = insert_page($page, $page_meta);
-  if($result === true) {
-    $new_id = mysqli_insert_id($db);
+  if($result->success === true) {
+    $new_id = $result->new_id;
     $_SESSION['message'] = 'The page was created successfully.';
     redirect_to(get_url('/staff/pages/show.php?id=' . $new_id));
   } else {

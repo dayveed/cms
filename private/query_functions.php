@@ -301,7 +301,11 @@
     }
     
     if($result) {
-      return true;
+      $return_obj = new stdClass();
+      $return_obj->success = true;
+      $return_obj->new_id = $new_id;
+
+      return $return_obj;
     } else {
       
       echo mysqli_error($db);

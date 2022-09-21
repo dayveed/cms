@@ -41,9 +41,7 @@ $page_set = find_pages_by_content_type_id($id);
     <div class="pages listing">
       <h2>Pages</h2>
 
-      <div class="actions">
-        <a class="action" href="<?php echo get_url('/staff/pages/new.php?content_type_id=' . h(u($content_type['id']))); ?>">Create New Page</a>
-      </div>
+      
 
       <table class="list">
         <tr>

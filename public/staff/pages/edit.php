@@ -21,7 +21,13 @@ if(is_post_request()) {
   $page['visible'] = $_POST['visible'] ?? '';
   $page['content'] = $_POST['content'] ?? '';
 
-  $result = update_page($page);
+  $page_meta = [];
+  $page_meta['service_id'] = $_POST['service_id'] ?? '';
+  $page_meta['contractor_id'] = $_POST['contractor_id'] ?? '';
+  $page_meta['minimum_cost'] = $_POST['minimum_cost'] ?? '';
+  $page_meta['maximum_cost'] = $_POST['maximum_cost'] ?? '';
+
+  $result = update_page($page, $page_meta);
   if($result === true) {
     $_SESSION['message'] = 'The page was updated successfully.';
     redirect_to(get_url('/staff/pages/show.php?id=' . $id));
@@ -103,6 +109,54 @@ $page_count = count_pages_by_content_type_id($page['content_type_id']);
           <textarea name="content" cols="60" rows="10"><?php echo h($page['content']); ?></textarea>
         </dd>
       </dl>
+      <dl id="page-service">
+        <dt>Service</dt>
+        <dd>
+        <select name="service_id">
+        <option disabled selected value> -- select an option -- </option>
+          <?php
+            $service_set = find_all_services();
+            while($service = mysqli_fetch_assoc($service_set)) {
+              echo "<option value=\"" . h($service['id']) . "\"";
+              if($page_meta["service_id"] == $service['id']) {
+                echo " selected";
+              }
+              echo ">" . h($service['name']) . "</option>";
+            }
+            mysqli_free_result($service_set);
+          ?>
+          </select>
+        </dd>
+      </dl>
+      <dl id="page-contractor">
+        <dt>Contractor</dt>
+        <dd>
+        <select name="contractor_id">
+        <option disabled selected value> -- select an option -- </option>
+          <?php
+            $contractor_set = find_all_contractors();
+            while($contractor = mysqli_fetch_assoc($contractor_set)) {
+              echo "<option value=\"" . h($contractor['id']) . "\"";
+              if($page_meta["contractor_id"] == $contractor['id']) {
+                echo " selected";
+              }
+              echo ">" . h($contractor['name']) . "</option>";
+            }
+            mysqli_free_result($contractor_set);
+          ?>
+          </select>
+        </dd>
+      </dl>
+      <dl id="page-maximum-cost">
+        <dt>Maximum cost</dt>
+        <dd><input type="number" name="maximum_cost" value="<?php echo h($page_meta['maximum_cost']); ?>" /></dd>
+      </dl>
+      <dl>
+      <dl id="page-minimum-cost">
+        <dt>Minimum cost</dt>
+        <dd><input type="number" name="minimum_cost" value="<?php echo h($page_meta['minimum_cost']); ?>" /></dd>
+      </dl>
+      <dl>
       <div id="operations">
         <input type="submit" value="Edit Page" />
       </div>
